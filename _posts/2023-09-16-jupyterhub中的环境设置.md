@@ -4,7 +4,7 @@ title:      jupyterhub中的环境设置
 subtitle:   有关conda环境的建立删除，以及pip路径的设置
 date:       2023-09-16
 author:     Klaus
-header-img: img/post-bg-cook.png
+header-img: img/post-bg-cook.jpg
 catalog: true
 tags:
     - jupyterhub
