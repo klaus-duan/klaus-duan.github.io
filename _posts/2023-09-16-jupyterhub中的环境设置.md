@@ -106,6 +106,6 @@ tags:
 	
 3. 添加新的Jupyter kernel:
 
-	> python -m ipykernel install --user --name `env_name` --display-name "`display_name`"
+		python -m ipykernel install --user --name 环境名称 --display-name "要显示出的环境名称，要带上双引号"
 
 这样新的kernel就会出现在你的jupyter的内核列表里。
