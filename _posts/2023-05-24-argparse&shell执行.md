@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      代码执行须知
+title:      脚本 & 参数 & shell
 subtitle:   argparse & shell 的简单介绍
 date:       2023-05-24
 author:     Klaus
