@@ -18,7 +18,7 @@ tags:
 
 本项目使用`langchian`框架，实现原理如下图所示，过程包括加载文件 -> 读取文本 -> 文本分割 -> 文本向量化 -> 问句向量化 -> 在文本向量中匹配出与问句向量最相似的 `top k`个 -> 匹配出的文本作为上下文和问题一起添加到 `prompt`中 -> 提交给 `LLM`生成回答。（刚刚做到提示词，目前处在一个比较尴尬的地步，显卡和🪜不能同时具备。）
 
-[图链接]
+![](https://raw.githubusercontent.com/klaus-duan/klaus-duan.github.io/master/img/langchain.png)
 
 # 文档上传及切分
 
@@ -131,12 +131,12 @@ tags:
 查看此embedding 模型的参数，`help(embeddings_model)`
 
 >     HuggingFaceEmbeddings(*, client: Any = None, 
-> 							model_name: str = 'sentence-transformers/all-mpnet-base-v2', 
-> 							cache_folder: Optional[str] = None, 
-> 							model_kwargs: Dict[str, Any] = None, 
-> 							encode_kwargs: Dict[str, Any] = None, 
-> 							multi_process: bool = False, 
-> 							show_progress: bool = False) -> None
+>				model_name: str = 'sentence-transformers/all-mpnet-base-v2', 
+> 				cache_folder: Optional[str] = None, 
+> 				model_kwargs: Dict[str, Any] = None, 
+> 				encode_kwargs: Dict[str, Any] = None, 
+> 				multi_process: bool = False, 
+> 				show_progress: bool = False) -> None)
 
 
 ## VectorStore
@@ -155,7 +155,7 @@ FAISS：
 
 	vectorstore = FAISS.from_documents(texts, embeddings_model)
 
-from\_documents接收两个参数，texts是分割好的数据，格式为documents。以及embeddings_model
+from\_documents接收两个参数，texts是分割好的数据，格式为documents。另一个参数为embeddings_model
 
 	help(FAISS.from_documents)
 
