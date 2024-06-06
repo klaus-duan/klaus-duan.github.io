@@ -1,7 +1,7 @@
 ---
 layout:     post
 title:      langchain流程图
-subtitle:   langchain的大致流程，附代码
+subtitle:   通过langchain框架优化chatglm-6b的输出
 date:       2024-06-04
 author:     Klaus
 header-img: img/post-bg-cook.jpg
@@ -10,6 +10,7 @@ tags:
     - 大模型
     - langchain
     - RAG
+    - Prompt
 ---
 
 # 前言
@@ -247,4 +248,87 @@ PromptTemplate可以单独配合vector store使用，也可以与LLM结合使用
 
 ## LLM
 
+chatglm-6b的文件中有一个`api.py`文件，运行这个文件，即可生成一个本地api，再经过langchain导入这个地址 (实际运行时要修改成`http://127.0.0.1:8000`) 的chatglm。
+
+	python api.py
+
+> Explicitly passing a `revision` is encouraged when loading a model with custom code to ensure no malicious code has been contributed in a newer revision.
+> 
+> Explicitly passing a `revision` is encouraged when loading a configuration with custom code to ensure no malicious code has been contributed in a newer revision.
+> 
+> Explicitly passing a `revision` is encouraged when loading a model with custom code to ensure no malicious code has been contributed in a newer revision.
+> 
+>Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████| 8/8 [00:31<00:00,  3.90s/it]
+>
+> INFO:     Started server process [1468]
+> 
+> INFO:     Waiting for application startup.
+> 
+> INFO:     Application startup complete.
+> 
+> INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+
+之后运行编辑的`api_access.py`文件，接入这个端口的chatglm。
+
+`api_access.py` :
+
+	import requests
+
+	def chat(prompt, history):
+	    resp = requests.post(
+	        url='http://127.0.0.1:8000',
+	        json={'prompt':prompt, 'history':history},
+	        headers={'Content-Type': 'application/json;chatsrt=utf-8'}
+	    )
+
+	    return resp.json()['response'], resp.json()['history']
+	
+	history = []
+	while True:
+	    response, history = chat(input("Question:"), history)
+	    print("Anwser:", response)
+
 # 输出answer
+
+再没有进行Prompt之前，模型会输出一个离谱的回答：
+
+> (langchain) aistudio@jupyter-11384883-7995100:~/work/ChatGLM-6B$ python api_access.py
+> 
+> Question:莉莉丝是什么公司
+> 
+> Anwser: 莉莉丝是一家中国科技公司，成立于2010年，总部位于北京市。该公司专注于移动游戏开发和发行，其最著名的产品是《原神》。
+> 
+> 莉莉丝游戏公司是中国领先的游戏开发和发行公司之一，其游戏作品在全球范围内都取得了一定的成功和口碑。除此之外，莉莉丝还推出了一系列其他移动游戏，如《梦幻模拟战》和《梦幻模拟战F》。
+> 
+> 莉莉丝在游戏领域拥有强大的实力和市场地位，其公司也一直致力于推动技术创新和行业发展。
+
+接下来将Prompt和问题一起输入：
+
+> Question:我会给你一些提示,然后你来回答莉莉丝是什么公司。提示:莉莉丝游戏，全称上海莉莉丝网络科技有限公司，成立于2013年5月，是中国大陆一家以网络游戏为主的公司，因为开发《小冰冰传奇》（原“刀塔传奇”）而知名。[1]公司总部位于中国上海市。2014年，莉莉丝第一款自研产品《刀塔传奇》（现改名“小冰冰传奇”）正式在App Store上线。2017年9月，莉莉丝第二款自研产品《剑与家园》发布。2017年11月2日，《艾彼》正式上架苹果商店。2018年9月，莉莉丝于海外发布代理发行产品《万国觉醒》。2018年，莉莉丝发布《迷失岛2:时间的灰烬》。2019年4月，莉莉丝自研项目《剑与远征》上线。2020年4月，莉莉丝发布益智解谜类游戏《南瓜先生2：九龙城寨》。
+> 
+> Anwser: 非常感谢您提供的提示！根据您提供的这些信息，我可以得出结论：莉莉丝游戏是一家成立于2013年5月，总部位于中国上海市的网络游戏公司，以开发《小冰冰传奇》这款游戏而知名。公司成立于2013年，之后推出了多款自研和代理产品，其中包括《刀塔传奇》、《剑与家园》、《艾彼》、《万国觉醒》、《迷失岛2：时间的灰烬》、《剑与远征》和《南瓜先生2：九龙城寨》等。公司在游戏领域拥有强大的实力和市场地位。
+
+llm此时会根据Prompt进行回答。
+
+再次提问相同的问题，llm也是保持之前的记忆：
+
+> Question:莉莉丝是什么公司
+> 
+> Anwser: 莉莉丝游戏是一家总部位于中国上海市的网络游戏公司，成立于2013年。公司以其开发《小冰冰传奇》这款游戏而知名，并随后推出了多款自研和代理产品，如《刀塔传奇》、《剑与家园》、《艾彼》、《万国觉醒》、《迷失岛2：时间的灰烬》、《剑与远征》和《南瓜先生2：九龙城寨》等。公司在游戏领域拥有强大的实力和市场地位。
+
+同时，`api.py`的终端下也会记录之前的操作：
+
+> INFO:     127.0.0.1:51260 - "POST / HTTP/1.1" 200 OK
+> 
+> [2024-06-06 22:31:11] ", prompt:"莉莉丝是什么公司", response:"'莉莉丝是一家中国科技公司，成立于2010年，总部位于北京市。该公司专注于移动游戏开发和发行，其最著名的产品是《原神》。\n\n莉莉丝游戏公司是中国领先的游戏开发和发行公司之一，其游戏作品在全球范围内都取得了一定的成功和口碑。除此之外，莉莉丝还推出了一系列其他移动游戏，如《梦幻模拟战》和《梦幻模拟战F》。\n\n莉莉丝在游戏领域拥有强大的实力和市场地位，其公司也一直致力于推动技术创新和行业发展。'"
+> 
+> INFO:     127.0.0.1:43388 - "POST / HTTP/1.1" 200 OK
+> [2024-06-06 22:34:56] ", prompt:"我会给你一些提示,然后你来回答莉莉丝是什么公司。提示:莉莉丝游戏，全称上海莉莉丝网络科技有限公司，成立于2013年5月，是中国大陆一家以网络游戏为主的公司，因为开发《小冰冰传奇》（原“刀塔传奇”）而知名。[1]公司总部位于中国上海市。2014年，莉莉丝第一款自研产品《刀塔传奇》（现改名“小冰冰传奇”）正式在App Store上线。2017年9月，莉莉丝第二款自研产品《剑与家园》发布。2017年11月2日，《艾彼》正式上架苹果商店。2018年9月，莉莉丝于海外发布代理发行产品《万国觉醒》。2018年，莉莉丝发布《迷失岛2:时间的灰烬》。2019年4月，莉莉丝自研项目《剑与远征》上线。2020年4月，莉莉丝发布益智解谜类游戏《南瓜先生2：九龙城寨》。", response:"'非常感谢您提供的提示！根据您提供的这些信息，我可以得出结论：莉莉丝游戏是一家成立于2013年5月，总部位于中国上海市的网络游戏公司，以开发《小冰冰传奇》这款游戏而知名。公司成立于2013年，之后推出了多款自研和代理产品，其中包括《刀塔传奇》、《剑与家园》、《艾彼》、《万国觉醒》、《迷失岛2：时间的灰烬》、《剑与远征》和《南瓜先生2：九龙城寨》等。公司在游戏领域拥有强大的实力和市场地位。'"
+> 
+> INFO:     127.0.0.1:51122 - "POST / HTTP/1.1" 200 OK
+> 
+> [2024-06-06 22:35:20] ", prompt:"莉莉丝是什么公司", response:"'莉莉丝游戏是一家总部位于中国上海市的网络游戏公司，成立于2013年。公司以其开发《小冰冰传奇》这款游戏而知名，并随后推出了多款自研和代理产品，如《刀塔传奇》、《剑与家园》、《艾彼》、《万国觉醒》、《迷失岛2：时间的灰烬》、《剑与远征》和《南瓜先生2：九龙城寨》等。公司在游戏领域拥有强大的实力和市场地位。'"
+> 
+> INFO:     127.0.0.1:38118 - "POST / HTTP/1.1" 200 OK
+
+此过程没有配合langchain包使用，因为没有执行成功。而是选择手动输入演示。
