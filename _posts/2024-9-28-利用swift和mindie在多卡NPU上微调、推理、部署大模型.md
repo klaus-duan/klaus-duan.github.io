@@ -24,6 +24,10 @@ tags:
 - `swift infer` 和 `swift deploy` 中有 `--merge_lora` 参数，设为 true。运行其中一个，会得出拼接后的模型参数
 - 通过mindie框架对拼接后的模型参数进行推理和部署
 
+微调框架：[swift 2.5](https://github.com/modelscope/swift)
+推理和部署框架：[mindie 1.0rc2](https://www.hiascend.com/developer/ascendhub/detail/af85b724a7e5469ebd7ea13c3439d48f)
+LLM：[Qwen1.5系列](https://modelscope.cn/organization/qwen?tab=model)
+
 ## swift 2.5 安装
 
 参考------->[NPU推理&微调大模型实战](https://developer.aliyun.com/article/1503494)
@@ -31,6 +35,8 @@ tags:
 未联网服务器安装swift 2.5，参考------->[打包 conda 环境](https://klaus-duan.github.io/2024/09/04/打包conda环境/)
 
 ## swift 文件修改
+
+能联网的机器可以忽略这一步。
 
 由于swift框架在运行时不能直接使用本地大模型且我的服务器不联网，需要提前修改框架中的 `~/swift/swift/llm/utils/model.py`
 
@@ -83,16 +89,16 @@ swift sft \
 
 ## swift infer 
 
-swift 2.5 暂时不支持多卡NPU，实际只使用里面的merge_lora功能
+swift 2.5 暂时不支持多卡NPU，实际只用到里面的merge_lora功能
 
 ```
 export NPROC_PER_NODE=8 \
 export ASCEND_RT_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
 export HCCL_SOME_VARIABLE=value
 swift infer \
-    --model_type '/data2/dxc/LLMs/Qwen1.5-32B-Chat' \
+    --model_type '{原始模型路径}' \
     --load_args_from_ckpt_dir true \
-    --ckpt_dir '/data2/dxc/LLMs/Qwen1.5-32B-Chat/v1-20240925-151141/checkpoint-90/' \
+    --ckpt_dir '{原始模型路径}/v1-20240925-151141/checkpoint-90/' \
     --load_dataset_config true \
     --tensor_parallel_size 8 \
     --merge_lora true \
@@ -105,6 +111,8 @@ swift infer \
 
 ## mindie进行后续的推理和部署
 
-首先将`v0-20240924-105443/checkpoint-110-merged/`中的`config.json`的`"sliding_window"`参数修改为与原始模型相同的数。未修改时为`null`，运行时会报错。
+我用的`Qwen1.5系列模型`首先要将`v0-20240924-105443/checkpoint-110-merged/`中的`config.json`的`"sliding_window"`参数修改为与原始模型相同的数。未修改时为`null`，运行时会报错。
+
+其他大模型最好也比较一下初始模型和微调模型的`config.json`,把微调模型的参数改成与原始模型相同。
 
 后续即可对模型进行推理和部署。模型路径为`checkpoint-110-merged`
