@@ -26,7 +26,7 @@ tags:
 ## Unstructured Loader
 
 我这里上传的是markdown格式的文件，langchain支持多种格式的文件上传，也可以直接上传文件夹。
-
+```python
     from langchain_community.document_loaders import UnstructuredMarkdownLoader
 
     markdown_path = '/path'
@@ -36,8 +36,9 @@ tags:
     data = loader.load()
 
     for i in data[0]:   # 查看格式
-      print(i)
 
+      print(i)
+```
 > ('page_content', 'layout:     post\ntitle:      利用免费平台加载chatglm\nsubtitle:   飞桨AI studio简介以及chatglm的')
 > 
 >  ('metadata', {'source': '/Users/klaus_d./Desktop/chatglm.md'})
@@ -49,7 +50,7 @@ tags:
 文档上传之后，进行分割
 
 以下为一个例子：
-
+```python
 	from langchain_text_splitters import MarkdownHeaderTextSplitter 
 	# 此工具可以根据文档的标题对文档进行切分
 	
@@ -65,7 +66,7 @@ tags:
 	
 	for i in md_header_splits[2]:  # 打印分割后文档的第3块输出
     	print(i)
-	
+```
 > ('page_content', 'Hi this is Molly')
 > 
 > ('metadata', {'Header 2': 'Baz'})
