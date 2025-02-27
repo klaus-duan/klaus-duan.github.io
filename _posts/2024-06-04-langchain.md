@@ -160,10 +160,12 @@ from langchain_community.vectorstores import FAISS
 
 vectorstore = FAISS.from_documents(texts, embeddings_model)
 ```
+
 from\_documents接收两个参数，texts是分割好的数据，格式为documents。另一个参数为embeddings_model
 ```python
 help(FAISS.from_documents)
 ```
+
 ```python
 Help on method from\_documents in module langchain_core.vectorstores:
 from_documents(documents: 'List[Document]', embedding: 'Embeddings', **kwargs: 'Any') -> 'VST' method of abc.ABCMeta instance
@@ -175,6 +177,7 @@ Return VectorStore initialized from documents and embeddings.
 比较query向量和vector store中文本向量的相似度，返回文本。
 
 - 当输入query为文本时：
+
 ```python
 query = "chatglm装在哪里"
 	
@@ -193,6 +196,7 @@ filter (Optional[Dict[str, str]]): Filter by metadata. Defaults to None.
 ```
 
 - 当输入query为向量时：
+
 ```python
 embedding_vector = embeddings_model.embed_query(query)
 		
@@ -215,6 +219,7 @@ filter (Optional[Dict[str, str]]): Filter by metadata. Defaults to None.
 PromptTemplate可以被用来指导模型生成特定类型的回答或执行特定的任务。
 
 PromptTemplate可以单独配合vector store使用，也可以与LLM结合使用，以下为单独配合Vector Stroe使用的示例：
+
 ```python
 from langchain_core.prompts import PromptTemplate
 	
