@@ -39,12 +39,12 @@ tags:
 
       print(i)
 ```
-> ('page_content', 'layout:     post\ntitle:      利用免费平台加载chatglm\nsubtitle:   飞桨AI studio简介以及chatglm的')
-> 
->  ('metadata', {'source': '/Users/klaus_d./Desktop/chatglm.md'})
-> 
->  ('type', 'Document')
+```python
+('page_content', 'layout:     post\ntitle:      利用免费平台加载chatglm\nsubtitle:   飞桨AI studio简介以及chatglm的')
 
+('metadata', {'source': '/Users/klaus_d./Desktop/chatglm.md'})
+('type', 'Document')
+```
 ## Text Splitter
 
 文档上传之后，进行分割
@@ -65,18 +65,18 @@ tags:
 	len(md_header_splits) #根据要求被分成了3份
 	
 	for i in md_header_splits[2]:  # 打印分割后文档的第3块输出
+
     	print(i)
 ```
-> ('page_content', 'Hi this is Molly')
-> 
-> ('metadata', {'Header 2': 'Baz'})
-> 
-> ('type', 'Document')
-
+```python
+('page_content', 'Hi this is Molly')
+('metadata', {'Header 2': 'Baz'})
+('type', 'Document')
+```
 分割文档的同时，还可以指定文档的长度，即`text chunks`。所以`text chunks`并不需要一个专用的包。
 
 ## Text Chunks
-
+```python
 	from langchain_text_splitters import CharacterTextSplitter
 	# 此工具可将文档按字符分割
 	
@@ -86,7 +86,9 @@ tags:
 	text_splitter = CharacterTextSplitter(
     	separator="\n\n",
     	chunk_size=300,     # 设置每段分割的长度
+
     	chunk_overlap=0,    # 设置两个分割段落的重叠长度
+
     	length_function=len,
     	is_separator_regex=False)
     	
@@ -96,27 +98,21 @@ tags:
     	print(i.page_content)
 
 	len(text_splitter.split_text(state_of_the_union))    # 文档被分割成15段
-
-> Created a chunk of size 345, which is longer than the specified 300
-> 
-> Created a chunk of size 345, which is longer than the specified 300
-> 
-> Created a chunk of size 345, which is longer than the specified 300
-> 
-> Created a chunk of size 345, which is longer than the specified 300
-> 
-> 227
-> 
-> 245
-> 
-> 270
-
+```python
+Created a chunk of size 345, which is longer than the specified 300
+Created a chunk of size 345, which is longer than the specified 300
+Created a chunk of size 345, which is longer than the specified 300
+Created a chunk of size 345, which is longer than the specified 300
+227
+245
+270
+```
 # 文档编码及存储
 
 ## Embedding
 
 文本转化为向量，这里用的huggingface embedding的`all-mpnet-base-v2`模型，即默认模型。
-
+```python
 	from langchain_huggingface import HuggingFaceEmbeddings
 	
 	embeddings_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2", show_progress=True)
@@ -124,62 +120,63 @@ tags:
 	text_to_embedding = [i.page_content for i in texts]
 	
 	# embed_decuments 接受 list[string] 字符串列表，要对多句话embedding时使用。
+
 	embeddings = embeddings_model.embed_documents(text_to_embedding)   
 
 	# embed_query 接受一个字符串，对一句话 embedding 时使用。
-	embedded_query = embeddings_model.embed_query("What was the name mentioned in the conversation?")
 
+	embedded_query = embeddings_model.embed_query("What was the name mentioned in the conversation?")
+```
 
 查看此embedding 模型的参数，`help(embeddings_model)`
-
->     HuggingFaceEmbeddings(*, client: Any = None, 
->				model_name: str = 'sentence-transformers/all-mpnet-base-v2', 
-> 				cache_folder: Optional[str] = None, 
-> 				model_kwargs: Dict[str, Any] = None, 
-> 				encode_kwargs: Dict[str, Any] = None, 
-> 				multi_process: bool = False, 
-> 				show_progress: bool = False) -> None)
-
+```python
+HuggingFaceEmbeddings(*, client: Any = None, 
+     			model_name: str = 'sentence-transformers/all-mpnet-base-v2', 
+ 			cache_folder: Optional[str] = None, 
+			model_kwargs: Dict[str, Any] = None, 
+			encode_kwargs: Dict[str, Any] = None, 
+			multi_process: bool = False, 
+			show_progress: bool = False) -> None)
+```
 
 ## VectorStore
 
 这里展示`Chroma`和`FAISS`向量存储库
 
 Chroma：
-
+```python
 	from langchain_chroma import Chroma
 
 	db = Chroma.from_documents(texts, embeddings_model)
-	
+```
 FAISS：
-
+```python
 	from langchain_community.vectorstores import FAISS
 
 	vectorstore = FAISS.from_documents(texts, embeddings_model)
-
+```
 from\_documents接收两个参数，texts是分割好的数据，格式为documents。另一个参数为embeddings_model
-
+```python
 	help(FAISS.from_documents)
-
-> Help on method from\_documents in module langchain_core.vectorstores:
-> 
-> from_documents(documents: 'List[Document]', embedding: 'Embeddings', **kwargs: 'Any') -> 'VST' method of abc.ABCMeta instance
-> 
->    Return VectorStore initialized from documents and embeddings.
-
+```
+```python
+Help on method from\_documents in module langchain_core.vectorstores:
+from_documents(documents: 'List[Document]', embedding: 'Embeddings', **kwargs: 'Any') -> 'VST' method of abc.ABCMeta instance
+Return VectorStore initialized from documents and embeddings.
+```
 
 ## Vecter Similarity
 
 比较query向量和vector store中文本向量的相似度，返回文本。
 
 - 当输入query为文本时：
-
+```python
 		query = "chatglm装在哪里"
 	
 		docs = db.similarity_search(query)
-		
+
 		# 默认返回4个结果
-	
+```
 	`help(db.similarity_search)`:
 
 	> Args:
@@ -191,11 +188,11 @@ from\_documents接收两个参数，texts是分割好的数据，格式为docume
 	> filter (Optional[Dict[str, str]]): Filter by metadata. Defaults to None.
     
 - 当输入query为向量时：
-
+```python
 		embedding_vector = embeddings_model.embed_query(query)
 		
 		docs = db.similarity_search_by_vector(embedding_vector)
-	
+```
 	`help(db.similarity_search_by_vector)`:
 	
 	> Args:
@@ -213,7 +210,7 @@ from\_documents接收两个参数，texts是分割好的数据，格式为docume
 PromptTemplate可以被用来指导模型生成特定类型的回答或执行特定的任务。
 
 PromptTemplate可以单独配合vector store使用，也可以与LLM结合使用，以下为单独配合Vector Stroe使用的示例：
-
+```python
 	from langchain_core.prompts import PromptTemplate
 	
 	example_prompt = PromptTemplate.from_template("Question: {question}\n{answer}")
@@ -232,7 +229,7 @@ PromptTemplate可以单独配合vector store使用，也可以与LLM结合使用
 	]
 
 `print(example_prompt.invoke(examples[0]).to_string())`:
-
+```
 > Question: Who lived longer, Muhammad Ali or Alan Turing?
 > 
 > Are follow up questions needed here: Yes.
@@ -272,7 +269,7 @@ chatglm-6b的文件中有一个`api.py`文件，运行这个文件，即可生�
 之后运行编辑的`api_access.py`文件，接入这个端口的chatglm。
 
 `api_access.py` :
-
+```python
 	import requests
 
 	def chat(prompt, history):
@@ -288,7 +285,7 @@ chatglm-6b的文件中有一个`api.py`文件，运行这个文件，即可生�
 	while True:
 	    response, history = chat(input("Question:"), history)
 	    print("Anwser:", response)
-
+```
 # 输出answer
 
 在没有进行Prompt之前，模型会输出一个离谱的回答：
