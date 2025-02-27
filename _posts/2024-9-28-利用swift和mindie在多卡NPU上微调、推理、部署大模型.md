@@ -42,15 +42,18 @@ LLM：[Qwen1.5系列](https://modelscope.cn/organization/qwen?tab=model)
 
 1.修改`ModelType`类下的模型路径：
 
-    # qwen1.5
-    qwen1half_32b_chat = '/data2/dxc/LLMs/Qwen1.5-32B-Chat'
-    qwen1half_32b_chat_w8a8 = '/data2/dxc/LLMs/Qwen1.5-32B-Chat_w8a8'
-    qwen1half_72b_chat = '/data2/dxc/LLMs/Qwen1.5-72B-Chat'
-    qwen1half_72b_chat_w8a16_fast = '/data2/dxc/LLMs/Qwen1.5-72B-Chat_w8a16_fast'
+```python
+# qwen1.5
 
+qwen1half_32b_chat = '/data2/dxc/LLMs/Qwen1.5-32B-Chat'
+qwen1half_32b_chat_w8a8 = '/data2/dxc/LLMs/Qwen1.5-32B-Chat_w8a8'
+qwen1half_72b_chat = '/data2/dxc/LLMs/Qwen1.5-72B-Chat'
+qwen1half_72b_chat_w8a16_fast = '/data2/dxc/LLMs/Qwen1.5-72B-Chat_w8a16_fast'
+```
 2.参考 model.py 中 `@register_model`的同类型模型的写法，写自己的@register_model，例如：
 
-	@register_model(
+```python
+@register_model(
     	ModelType.qwen1half_32b_chat_w8a8,
     	'/data2/dxc/LLMs/Qwen1.5-32B-Chat_w8a8',
     	LoRATM.llama,
@@ -60,6 +63,7 @@ LLM：[Qwen1.5系列](https://modelscope.cn/organization/qwen?tab=model)
     	support_lmdeploy=False,
     	support_megatron=False,
     	requires=['transformers>=4.37'])
+```
 
 3.删掉所有其他的 @register\_model ，后续执行过程中如果还有不联网导致的 register\_model 失败，找到 register\_model 继续删。
 
@@ -68,7 +72,7 @@ LLM：[Qwen1.5系列](https://modelscope.cn/organization/qwen?tab=model)
 
 多卡NPU大模型微调（默认方式为lora）
 
-```
+```shell
 export NPROC_PER_NODE=8 \
 export ASCEND_RT_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
 export HCCL_SOME_VARIABLE=value \
@@ -91,7 +95,7 @@ swift sft \
 
 swift 2.5 暂时不支持多卡NPU，实际只用到里面的merge_lora功能
 
-```
+```shell
 export NPROC_PER_NODE=8 \
 export ASCEND_RT_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
 export HCCL_SOME_VARIABLE=value
